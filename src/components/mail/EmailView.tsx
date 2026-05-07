@@ -111,14 +111,14 @@ export function EmailView({ email }: { email: Email | null }) {
                       {email.attachments.map((attachment) => (
                         <motion.div
                           key={attachment.name}
-                          className="glass-tile flex items-center gap-2.5 rounded-md p-2"
+                          className="glass-tile flex items-center gap-2 rounded-md px-2 py-1.5"
                         >
-                          <div className="flex h-7 w-7 items-center justify-center rounded border border-white/[0.1] bg-white/[0.08] text-[9px] font-bold uppercase text-muted-foreground shadow-[inset_0_1px_0_oklch(1_0_0/0.1)]">
+                          <div className="flex h-6 w-6 items-center justify-center rounded border border-white/[0.1] bg-white/[0.06] text-[8.5px] font-bold uppercase text-muted-foreground shadow-[inset_0_1px_0_oklch(1_0_0/0.1)]">
                             {attachment.type}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="truncate text-[11.5px] font-medium leading-4 text-foreground">{attachment.name}</div>
-                            <div className="text-[10px] leading-3 text-muted-foreground">{attachment.size}</div>
+                            <div className="truncate text-[11px] font-medium leading-[14px] text-foreground">{attachment.name}</div>
+                            <div className="text-[9.5px] leading-[12px] text-muted-foreground">{attachment.size}</div>
                           </div>
                         </motion.div>
                       ))}
