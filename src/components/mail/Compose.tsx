@@ -133,7 +133,7 @@ export function Compose({
       size: formatFileSize(file.size),
       type,
     }));
-    
+
     setAttachments([...attachments, ...newAttachments]);
     e.target.value = ""; // Reset input
   };
@@ -151,7 +151,7 @@ export function Compose({
       onShowToast?.("Please enter a subject");
       return;
     }
-    
+
     setIsSending(true);
     
     // Simulate sending
