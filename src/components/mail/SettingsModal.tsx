@@ -180,14 +180,30 @@ function AppearanceSettings({
             ))}
           </div>
         </div>
-        <SettingsToggle label="Compact mode" description="Reduce spacing in the email list" />
-        <SettingsToggle label="Show avatars" description="Display sender avatars" defaultChecked />
+        <SettingsToggle
+          label="Compact mode"
+          description="Reduce spacing in the email list"
+          checked={preferences.compactMode}
+          onChange={(checked) => onChange({ ...preferences, compactMode: checked })}
+        />
+        <SettingsToggle
+          label="Show avatars"
+          description="Display sender avatars"
+          checked={preferences.showAvatars}
+          onChange={(checked) => onChange({ ...preferences, showAvatars: checked })}
+        />
       </div>
     </div>
   );
 }
 
-function NotificationSettings() {
+function NotificationSettings({
+  preferences,
+  onChange,
+}: {
+  preferences: UiPreferences;
+  onChange: (preferences: UiPreferences) => void;
+}) {
   return (
     <div className="space-y-6">
       <div>
