@@ -200,7 +200,9 @@ export function Compose({
             className="glass-strong fixed bottom-6 right-6 z-50 w-[min(640px,calc(100vw-2rem))] overflow-hidden rounded-2xl"
           >
             <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-              <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">New message</div>
+              <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                New message
+              </div>
               <button
                 onClick={onClose}
                 className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-white/[0.06] hover:text-foreground"
@@ -221,7 +223,7 @@ export function Compose({
                 placeholder="Write your message…"
                 className="glow-ring w-full resize-none rounded-lg border border-transparent bg-transparent px-1 py-2 text-sm placeholder:text-muted-foreground focus:border-white/10"
               />
-              
+
               {/* Attachments */}
               {attachments.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-2">
