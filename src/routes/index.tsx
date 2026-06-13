@@ -10,7 +10,16 @@ import { Compose, type ComposeSubmission } from "@/components/mail/Compose";
 import { RightPanel, type ContextAction } from "@/components/mail/RightPanel";
 import { CommandPalette } from "@/components/mail/CommandPalette";
 import { SettingsModal } from "@/components/mail/SettingsModal";
-import { emails as initialEmails, getEmailsForFolder, mailFolders, type Email, type MailFolder } from "@/components/mail/data";
+import {
+  defaultMailFilters,
+  emails as initialEmails,
+  getEmailsForFolder,
+  mailFolders,
+  type Email,
+  type MailFilters,
+  type MailFolder,
+} from "@/components/mail/data";
+import { usePreferences } from "@/features/preferences";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,7 +27,10 @@ export const Route = createFileRoute("/")({
       { title: "Stealth" },
       { name: "description", content: "Stealth is a cryptographic mail client built on Stellar." },
       { property: "og:title", content: "Stealth" },
-      { property: "og:description", content: "Cryptographic mail identities, postage, and delivery proofs on Stellar." },
+      {
+        property: "og:description",
+        content: "Cryptographic mail identities, postage, and delivery proofs on Stellar.",
+      },
     ],
   }),
   component: MailApp,
