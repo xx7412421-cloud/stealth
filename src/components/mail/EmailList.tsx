@@ -32,21 +32,30 @@ export function EmailList({
   showAvatars: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
-  const folderLabel = getFolderLabel(folder);
-  
-  const filtered = getEmailsForFolder(emails, folder)
-    .filter((e) => {
-      if (activeTab === "unread") return e.unread;
-      if (activeTab === "flagged") return e.starred;
-      return true;
-    });
+  const folderLabel = customFolder ?? getFolderLabel(folder);
+
+  const folderEmails = customFolder
+    ? emails.filter((email) =>
+        email.labels?.some((label) => label.toLowerCase() === customFolder.toLowerCase()),
+      )
+    : getEmailsForFolder(emails, folder);
+
+  const filtered = applyMailFilters(folderEmails, filters).filter((e) => {
+    if (activeTab === "unread") return e.unread;
+    if (activeTab === "flagged") return e.starred;
+    return true;
+  });
 
   return (
     <section className="mail-list-atmosphere relative m-3 flex h-[calc(100vh-3.5rem-1.5rem)] w-full flex-col overflow-hidden rounded-[8px] md:w-[328px] md:shrink-0 lg:w-[336px]">
       <div className="relative z-10 flex items-center justify-between border-b border-white/10 bg-white/[0.025] px-3.5 py-3 backdrop-blur-sm">
         <div>
-          <h2 className="text-[13px] font-semibold leading-5 tracking-normal text-foreground">{folderLabel}</h2>
-          <p className="text-[11px] leading-4 text-muted-foreground">{filtered.length} conversations</p>
+          <h2 className="text-[13px] font-semibold leading-5 tracking-normal text-foreground">
+            {folderLabel}
+          </h2>
+          <p className="text-[11px] leading-4 text-muted-foreground">
+            {filtered.length} conversations
+          </p>
         </div>
         <div className="flex items-center gap-1 rounded-[6px] border border-white/12 bg-gradient-to-b from-white/[0.08] to-white/[0.03] p-0.5 text-[10px] shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.12)]">
           {(["all", "unread", "flagged"] as const).map((t) => (
