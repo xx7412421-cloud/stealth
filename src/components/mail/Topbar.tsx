@@ -132,39 +132,45 @@ export function Topbar({
           <IconBtn
             label="Filter"
             onClick={() => setFilterOpen(!filterOpen)}
-            active={filterOpen || filters.unreadOnly || filters.hasAttachments || filters.dateRange !== "all"}
+            active={
+              filterOpen ||
+              filters.unreadOnly ||
+              filters.hasAttachments ||
+              filters.dateRange !== "all"
+            }
           >
             <Filter className="h-4 w-4" />
           </IconBtn>
         </div>
-        {typeof document !== "undefined" && createPortal(
-          <AnimatePresence>
-            {filterOpen && (
-              <>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => setFilterOpen(false)}
-                  className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-xl"
-                />
-                <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 28 }}
-                  style={{
-                    position: "fixed",
-                    top: filterRect ? filterRect.bottom + 8 : 64,
-                    right: filterRect ? Math.max(8, window.innerWidth - filterRect.right) : 12,
-                    width: 224,
-                    zIndex: 110,
-                  }}
-                  className="glass-modal overflow-hidden rounded-xl p-2"
-                >
-                  <div className="mb-2 px-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Filters
-                  </div>
+        {typeof document !== "undefined" &&
+          createPortal(
+            <AnimatePresence>
+              {filterOpen && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setFilterOpen(false)}
+                    className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-xl"
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 28 }}
+                    style={{
+                      position: "fixed",
+                      top: filterRect ? filterRect.bottom + 8 : 64,
+                      right: filterRect ? Math.max(8, window.innerWidth - filterRect.right) : 12,
+                      width: 224,
+                      zIndex: 110,
+                    }}
+                    className="glass-modal overflow-hidden rounded-xl p-2"
+                  >
+                    <div className="mb-2 px-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                      Filters
+                    </div>
 
                   <FilterToggle
                     icon={Check}
