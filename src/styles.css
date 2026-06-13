@@ -369,8 +369,15 @@
   }
 
   @keyframes float-orb {
-    0%, 100% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(30px, -20px) scale(1.05); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(30px, -20px) scale(1.05);
+    }
   }
-  .float-orb { animation: float-orb 12s ease-in-out infinite; }
+  .float-orb {
+    animation: float-orb 12s ease-in-out infinite;
+  }
 }
