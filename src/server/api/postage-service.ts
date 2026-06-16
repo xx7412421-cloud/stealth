@@ -40,9 +40,15 @@ export async function submitPostage(
   repository: ApiRepository,
   input: Omit<Postage, "createdAt" | "status">,
   now = new Date(),
-  context: { fingerprint?: string; ip?: string; relayId?: string } = {},
+  context: {
+    accountId?: string;
+    fingerprint?: string;
+    ip?: string;
+    relayId?: string;
+    sender?: string;
+  } = {},
 ) {
-  const accountId = (context as { accountId?: string }).accountId ?? "unknown";
+  const accountId = context.accountId ?? "unknown";
   const accountLimit = await checkAccountLimit(repository, input.sender);
   if (!accountLimit.allowed) {
     metrics.incrementCounter("postage_limit_rejected", {
@@ -72,7 +78,7 @@ export async function submitPostage(
       limit: "device",
     });
     throw new ApiError(429, "rate_limited", "Device limit exceeded", {
-      retryAfterMs: deviceLimit.retryAfterMs,
+      retryAfterSeconds: deviceLimit.retryAfterSeconds,
     });
   }
 
@@ -82,7 +88,7 @@ export async function submitPostage(
     input.recipient,
   );
   if (!senderRecipientLimit.allowed) {
-    const sender = (context as { sender?: string }).sender ?? input.sender;
+    const sender = context.sender ?? input.sender;
     metrics.incrementCounter("postage_limit_rejected", {
       limit: "sender_recipient",
       sender,

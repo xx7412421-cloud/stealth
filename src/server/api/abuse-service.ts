@@ -96,10 +96,10 @@ export async function checkDeviceLimit(
   repository: ApiRepository,
   fingerprint: string,
   opts?: { windowMs?: number; max?: number },
-): Promise<{ allowed: boolean; retryAfterMs?: number }> {
+): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
   const windowMs = opts?.windowMs ?? 60_000;
   const max = opts?.max ?? 30;
   const count = await repository.incrementCounter(`device:${fingerprint}`, windowMs / 1000);
-  if (count > max) return { allowed: false, retryAfterMs: windowMs };
+  if (count > max) return { allowed: false, retryAfterSeconds: windowMs / 1000 };
   return { allowed: true };
 }

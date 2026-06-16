@@ -136,7 +136,7 @@ describe("abuse service", () => {
 
     const blocked = await checkDeviceLimit(repository, fingerprint);
     expect(blocked).toMatchObject({ allowed: false });
-    expect(blocked.retryAfterMs).toBe(60_000);
+    expect(blocked.retryAfterSeconds).toBe(60);
   });
 
   it("allows a fingerprint again after the device window resets", async () => {
