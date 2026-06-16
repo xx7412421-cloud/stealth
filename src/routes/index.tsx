@@ -40,6 +40,7 @@ import {
   type SnoozeTarget,
 } from "@/features/snooze";
 import type { SnoozeState } from "@/components/mail/data";
+import { useIsMobile } from "@/lib/use-media-query";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -78,6 +79,7 @@ function MailApp() {
   const { preferences, setPreferences, hydrated } = usePreferences();
   const senderConversion = useSenderConversion();
   const snooze = useSnooze();
+  const isMobile = useIsMobile();
 
   // Gate: show onboarding only after localStorage has been read (hydrated) and only
   // when it has not been completed in a previous session.
@@ -182,6 +184,20 @@ function MailApp() {
   const handleUnsnooze = (e: Email) => {
     updateEmail(e.id, unsnoozePatch());
     showToast(`"${e.subject}" returned to your inbox`);
+  };
+
+  const handleArchive = (e: Email) => {
+    updateEmail(e.id, { folder: "archive" });
+    showToast(`"${e.subject}" archived`);
+  };
+
+  const handleStar = (e: Email) => {
+    updateEmail(e.id, { starred: !e.starred });
+    showToast(e.starred ? `Unstarred "${e.subject}"` : `Starred "${e.subject}"`);
+  };
+
+  const handleMobileSnooze = (e: Email) => {
+    openSnooze(e);
   };
 
   const quoteBody = (e: Email) =>
@@ -384,6 +400,10 @@ function MailApp() {
               customFolder={customFolder}
               compact={preferences.compactMode}
               showAvatars={preferences.showAvatars}
+              useMobile={isMobile}
+              onArchive={handleArchive}
+              onStar={handleStar}
+              onSnooze={handleMobileSnooze}
             />
             <EmailView email={selected} actions={emailActions} />
             <RightPanel

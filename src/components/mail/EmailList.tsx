@@ -10,6 +10,7 @@ import {
 } from "./data";
 import { cn } from "@/lib/utils";
 import { ConvertSenderButton } from "@/features/sender-conversion";
+import { MobileMailCard } from "./MobileMailCard";
 
 type FilterTab = "all" | "unread" | "flagged";
 
@@ -23,6 +24,10 @@ export function EmailList({
   customFolder,
   compact,
   showAvatars,
+  useMobile,
+  onArchive,
+  onStar,
+  onSnooze,
 }: {
   emails: Email[];
   selectedId: string | null;
@@ -33,6 +38,10 @@ export function EmailList({
   customFolder?: string | null;
   compact: boolean;
   showAvatars: boolean;
+  useMobile?: boolean;
+  onArchive?: (email: Email) => void;
+  onStar?: (email: Email) => void;
+  onSnooze?: (email: Email) => void;
 }) {
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
   const folderLabel = customFolder ?? getFolderLabel(folder);
@@ -79,7 +88,10 @@ export function EmailList({
         </div>
       </div>
 
-      <ul className="scrollbar-thin relative z-10 flex-1 space-y-2 overflow-y-auto p-2.5">
+      <ul className={cn(
+        "scrollbar-thin relative z-10 flex-1 overflow-y-auto",
+        useMobile ? "space-y-2 p-2" : "space-y-2 p-2.5"
+      )}>
         {filtered.length === 0 && (
           <li className="px-3 py-10 text-center text-xs text-muted-foreground">
             No conversations in {folderLabel.toLowerCase()} yet.
@@ -87,6 +99,36 @@ export function EmailList({
         )}
         {filtered.map((e, idx) => {
           const active = selectedId === e.id;
+          
+          if (useMobile) {
+            return (
+              <motion.li
+                key={e.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.03, duration: 0.25, ease: [0.2, 0.8, 0.2, 1] }}
+              >
+                <MobileMailCard
+                  email={e}
+                  selected={active}
+                  onSelect={() => onSelect(e.id)}
+                  onArchive={() => onArchive?.(e)}
+                  onStar={() => onStar?.(e)}
+                  onSnooze={() => onSnooze?.(e)}
+                />
+                {e.folder === "requests" && (
+                  <div className="mt-1 flex justify-end px-2">
+                    <ConvertSenderButton
+                      variant="subtle"
+                      label="Review sender"
+                      onClick={() => onConvertSender(e)}
+                    />
+                  </div>
+                )}
+              </motion.li>
+            );
+          }
+
           return (
             <motion.li
               key={e.id}
