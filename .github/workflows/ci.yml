@@ -142,6 +142,8 @@ jobs:
   security:
     name: Security & Dependency Review
     runs-on: ubuntu-latest
+    env:
+      GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
     steps:
       - uses: actions/checkout@v4
 
@@ -150,11 +152,10 @@ jobs:
         uses: actions/dependency-review-action@v4
 
       - name: Secret Scanning
-        if: ${{ secrets.GITLEAKS_LICENSE != '' }}
+        if: ${{ env.GITLEAKS_LICENSE != '' }}
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
   provenance:
     name: Provenance & Hashes

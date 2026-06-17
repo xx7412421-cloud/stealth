@@ -16,9 +16,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { EmojiPicker } from "./EmojiPicker";
 import { TrustBadge, type TrustState } from "@/features/design-system";
 import { cn } from "@/lib/utils";
+import { resolveRecipients } from "@/features/compose/recipientResolver";
 
 import {
   getRecipientReadiness,
+  parseRecipients,
   validateComposeDraft,
   type Attachment,
   type ComposeMode,
@@ -37,6 +39,7 @@ export function Compose({
   mode = "compose",
   blockedRecipients = [],
   onSubmit,
+  resolutionContext,
 }: {
   open: boolean;
   onClose: () => void;
@@ -48,6 +51,7 @@ export function Compose({
   mode?: ComposeMode;
   blockedRecipients?: string[];
   onSubmit?: (submission: ComposeSubmission) => void;
+  resolutionContext?: Parameters<typeof resolveRecipients>[2];
 }) {
   const [to, setTo] = useState(initialTo);
   const [subject, setSubject] = useState(initialSubject);
@@ -58,6 +62,7 @@ export function Compose({
   const [encrypted, setEncrypted] = useState(true);
   const [receipt, setReceipt] = useState(true);
   const [postage, setPostage] = useState(initialPostage);
+  const [resolvedRecipients, setResolvedRecipients] = useState<RecipientReadiness[]>([]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -101,8 +106,37 @@ export function Compose({
       setEncrypted(true);
       setReceipt(true);
       setPostage(initialPostage);
+      setResolvedRecipients([]);
     }
   }, [open, initialTo, initialSubject, initialBody, initialPostage]);
+
+  // Resolve recipients when `to` field changes
+  useEffect(() => {
+    const addresses = parseRecipients(to);
+    if (!addresses.length) {
+      setResolvedRecipients([]);
+      return;
+    }
+
+    // Show initial "resolving" state immediately
+    setResolvedRecipients(getRecipientReadiness(to, postage, blockedRecipients));
+
+    // Debounce resolution to avoid excessive API calls
+    const timer = setTimeout(async () => {
+      const resolved = await resolveRecipients(addresses, blockedRecipients, resolutionContext);
+
+      // Update postage state based on current postage value
+      const postageReady = Number.parseFloat(postage) > 0;
+      const withPostage = resolved.map((r) => ({
+        ...r,
+        postage: postageReady ? ("ready" as const) : ("required" as const),
+      }));
+
+      setResolvedRecipients(withPostage);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [to, blockedRecipients, postage, resolutionContext]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -142,13 +176,34 @@ export function Compose({
   };
 
   const handleSend = async (scheduled = false) => {
-    const validationError = validateComposeDraft({ to, body, postage, blockedRecipients });
-    if (validationError) {
-      onShowToast?.(validationError);
+    // Prevent sending if recipients not fully resolved
+    if (resolvedRecipients.length === 0) {
+      onShowToast?.("Please add at least one recipient");
       return;
     }
+
+    if (resolvedRecipients.some((r) => r.state === "resolving" || r.state === "invalid")) {
+      onShowToast?.("All recipients must be verified before sending");
+      return;
+    }
+
+    if (resolvedRecipients.some((r) => r.state === "blocked")) {
+      onShowToast?.("Remove blocked recipients before sending");
+      return;
+    }
+
+    if (resolvedRecipients.some((r) => r.postage === "required")) {
+      onShowToast?.("Add postage before sending");
+      return;
+    }
+
     if (!subject.trim()) {
       onShowToast?.("Please enter a subject");
+      return;
+    }
+
+    if (!body.trim()) {
+      onShowToast?.("Please enter a message");
       return;
     }
 
@@ -217,9 +272,7 @@ export function Compose({
             </div>
             <div className="space-y-0 px-4">
               <Field label="To" placeholder="recipients@…" value={to} onChange={setTo} />
-              <RecipientReadinessChips
-                recipients={getRecipientReadiness(to, postage, blockedRecipients)}
-              />
+              <RecipientReadinessChips recipients={resolvedRecipients} />
               <Field label="Subject" placeholder="Subject" value={subject} onChange={setSubject} />
             </div>
             <div className="px-4 pb-2">
@@ -399,10 +452,29 @@ export function Compose({
   );
 }
 
-function recipientTrustState(policy: RecipientReadiness["policy"]): TrustState {
-  if (policy === "blocked") return "blocked";
-  if (policy === "verify") return "verified";
-  return "allowed";
+function recipientTrustState(state: RecipientReadiness["state"]): TrustState {
+  if (state === "blocked") return "blocked";
+  if (state === "verified") return "verified";
+  if (state === "unknown") return "unknown";
+  if (state === "invalid") return "blocked"; // invalid is treated like blocked visually
+  return "unknown"; // resolving
+}
+
+function getRecipientChipColor(state: RecipientReadiness["state"]) {
+  switch (state) {
+    case "verified":
+      return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+    case "blocked":
+      return "border-red-300/25 bg-red-300/10 text-red-100";
+    case "invalid":
+      return "border-red-300/25 bg-red-300/10 text-red-100";
+    case "unknown":
+      return "border-amber-300/25 bg-amber-300/10 text-amber-100";
+    case "resolving":
+      return "border-blue-300/25 bg-blue-300/10 text-blue-100 animate-pulse";
+    default:
+      return "border-zinc-300/25 bg-zinc-300/10 text-zinc-100";
+  }
 }
 
 function RecipientReadinessChips({ recipients }: { recipients: RecipientReadiness[] }) {
@@ -411,26 +483,34 @@ function RecipientReadinessChips({ recipients }: { recipients: RecipientReadines
   return (
     <div className="flex flex-wrap gap-1.5 border-b border-white/5 py-2 pl-[76px]">
       {recipients.map((recipient) => (
-        <span
+        <div
           key={recipient.address}
           title={recipient.message}
           className={cn(
-            "rounded-full border px-2 py-1 text-[10px]",
-            recipient.policy === "blocked"
-              ? "border-red-300/20 bg-red-300/[0.06] text-red-200"
-              : recipient.postage === "ready"
-                ? "border-emerald-200/20 bg-emerald-200/[0.06] text-emerald-100"
-                : "border-amber-200/20 bg-amber-200/[0.06] text-amber-100",
+            "rounded-full border px-3 py-1.5 text-[10px] flex items-center gap-2",
+            getRecipientChipColor(recipient.state),
           )}
         >
           <TrustBadge
-            state={recipientTrustState(recipient.policy)}
+            state={recipientTrustState(recipient.state)}
             showLabel={false}
             size="sm"
-            className="mr-1 align-middle"
+            className="shrink-0"
           />
-          {recipient.address} · {recipient.policy} · postage {recipient.postage}
-        </span>
+          <span className="truncate">{recipient.address}</span>
+
+          {/* Show account details if resolved */}
+          {recipient.resolvedAccount && (
+            <span className="shrink-0 text-[9px] opacity-75">
+              → {recipient.resolvedAccount.slice(0, 8)}…
+            </span>
+          )}
+
+          {/* Show encryption key availability */}
+          {recipient.encryptionKey && (
+            <span className="shrink-0 inline-block w-2 h-2 rounded-full bg-current opacity-50" />
+          )}
+        </div>
       ))}
     </div>
   );
