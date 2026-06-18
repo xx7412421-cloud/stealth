@@ -9,7 +9,7 @@ import { defaultCampaignSnapshots } from "../fixtures/campaignSnapshotFixtures";
 export function CampaignsContent() {
   const [campaignSubView, setCampaignSubView] = useState<"assignments" | "snapshots">(
     "assignments",
-  ); 
+  );
   const [campaignDraftDataset, setCampaignDraftDataset] = useState<Draft[]>(
     () => defaultCampaignSnapshots[0]?.data ?? [],
   );
@@ -36,7 +36,7 @@ export function CampaignsContent() {
                 isActive
                   ? "bg-white/[0.08] text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
-              ) 
+              )}
             >
               <TabIcon className="h-3.5 w-3.5" />
               {tab.label}
