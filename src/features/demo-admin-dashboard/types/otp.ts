@@ -1,4 +1,4 @@
-export type OTPType = 'email' | 'passkey' | 'sms';
+export type OTPType = "email" | "passkey" | "sms";
 
 export interface OTPFixture {
   id: string;
@@ -7,6 +7,6 @@ export interface OTPFixture {
   type: OTPType;
   safeCode: string;
   messagePreview: string;
-  status: 'delivered' | 'pending' | 'failed';
+  status: "delivered" | "pending" | "failed";
   timestamp: string;
 }
