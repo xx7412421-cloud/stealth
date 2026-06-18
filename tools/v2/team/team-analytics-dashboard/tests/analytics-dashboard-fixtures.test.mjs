@@ -20,7 +20,10 @@ async function loadFixture() {
 test("fixture loads and declares the correct tool identity", async () => {
   const fixture = await loadFixture();
   assert.equal(fixture.tool, "team-analytics-dashboard");
-  assert.ok(Number.isInteger(fixture.version) && fixture.version > 0, "version must be a positive integer");
+  assert.ok(
+    Number.isInteger(fixture.version) && fixture.version > 0,
+    "version must be a positive integer",
+  );
   assert.ok(fixture.teamId, "teamId is required");
 });
 
@@ -40,19 +43,46 @@ test("members array contains at least one member with required fields", async ()
   for (const m of members) {
     assert.ok(m.memberId, `${m.name ?? "unknown"}: memberId is required`);
     assert.ok(m.name, `${m.memberId}: name is required`);
-    assert.ok(Number.isFinite(m.emailsReceived) && m.emailsReceived >= 0, `${m.memberId}: emailsReceived must be >= 0`);
-    assert.ok(Number.isFinite(m.emailsHandled) && m.emailsHandled >= 0, `${m.memberId}: emailsHandled must be >= 0`);
-    assert.ok(m.emailsHandled <= m.emailsReceived, `${m.memberId}: emailsHandled cannot exceed emailsReceived`);
-    assert.ok(Number.isFinite(m.openThreads) && m.openThreads >= 0, `${m.memberId}: openThreads must be >= 0`);
-    assert.ok(Number.isFinite(m.resolvedThreads) && m.resolvedThreads >= 0, `${m.memberId}: resolvedThreads must be >= 0`);
-    assert.ok(Number.isFinite(m.slaBreaches) && m.slaBreaches >= 0, `${m.memberId}: slaBreaches must be >= 0`);
-    assert.ok(allowedStatuses.has(m.status), `${m.memberId}: status "${m.status}" is not in the allowed set`);
+    assert.ok(
+      Number.isFinite(m.emailsReceived) && m.emailsReceived >= 0,
+      `${m.memberId}: emailsReceived must be >= 0`,
+    );
+    assert.ok(
+      Number.isFinite(m.emailsHandled) && m.emailsHandled >= 0,
+      `${m.memberId}: emailsHandled must be >= 0`,
+    );
+    assert.ok(
+      m.emailsHandled <= m.emailsReceived,
+      `${m.memberId}: emailsHandled cannot exceed emailsReceived`,
+    );
+    assert.ok(
+      Number.isFinite(m.openThreads) && m.openThreads >= 0,
+      `${m.memberId}: openThreads must be >= 0`,
+    );
+    assert.ok(
+      Number.isFinite(m.resolvedThreads) && m.resolvedThreads >= 0,
+      `${m.memberId}: resolvedThreads must be >= 0`,
+    );
+    assert.ok(
+      Number.isFinite(m.slaBreaches) && m.slaBreaches >= 0,
+      `${m.memberId}: slaBreaches must be >= 0`,
+    );
+    assert.ok(
+      allowedStatuses.has(m.status),
+      `${m.memberId}: status "${m.status}" is not in the allowed set`,
+    );
 
     if (m.status === "away") {
-      assert.equal(m.avgResponseTimeHours, null, `${m.memberId}: away members must have null avgResponseTimeHours`);
+      assert.equal(
+        m.avgResponseTimeHours,
+        null,
+        `${m.memberId}: away members must have null avgResponseTimeHours`,
+      );
     } else {
-      assert.ok(Number.isFinite(m.avgResponseTimeHours) && m.avgResponseTimeHours >= 0,
-        `${m.memberId}: avgResponseTimeHours must be a non-negative number`);
+      assert.ok(
+        Number.isFinite(m.avgResponseTimeHours) && m.avgResponseTimeHours >= 0,
+        `${m.memberId}: avgResponseTimeHours must be a non-negative number`,
+      );
     }
   }
 });
@@ -71,8 +101,10 @@ test("overloaded status is consistent with open-thread or SLA thresholds", async
     if (m.status === "overloaded") {
       const isOverloaded =
         m.openThreads > OVERLOAD_OPEN_THRESHOLD || m.slaBreaches > OVERLOAD_SLA_BREACH_THRESHOLD;
-      assert.ok(isOverloaded,
-        `${m.memberId}: overloaded status requires openThreads > ${OVERLOAD_OPEN_THRESHOLD} or slaBreaches > ${OVERLOAD_SLA_BREACH_THRESHOLD}`);
+      assert.ok(
+        isOverloaded,
+        `${m.memberId}: overloaded status requires openThreads > ${OVERLOAD_OPEN_THRESHOLD} or slaBreaches > ${OVERLOAD_SLA_BREACH_THRESHOLD}`,
+      );
     }
   }
 });
@@ -85,17 +117,39 @@ test("summary totals are consistent with member data", async () => {
   const expectedOpen = members.reduce((n, m) => n + m.openThreads, 0);
   const expectedBreaches = members.reduce((n, m) => n + m.slaBreaches, 0);
 
-  assert.equal(summary.totalEmailVolume, expectedVolume, "summary.totalEmailVolume must equal sum of member emailsReceived");
-  assert.equal(summary.totalHandled, expectedHandled, "summary.totalHandled must equal sum of member emailsHandled");
-  assert.equal(summary.totalOpen, expectedOpen, "summary.totalOpen must equal sum of member openThreads");
-  assert.equal(summary.totalSlaBreaches, expectedBreaches, "summary.totalSlaBreaches must equal sum of member slaBreaches");
+  assert.equal(
+    summary.totalEmailVolume,
+    expectedVolume,
+    "summary.totalEmailVolume must equal sum of member emailsReceived",
+  );
+  assert.equal(
+    summary.totalHandled,
+    expectedHandled,
+    "summary.totalHandled must equal sum of member emailsHandled",
+  );
+  assert.equal(
+    summary.totalOpen,
+    expectedOpen,
+    "summary.totalOpen must equal sum of member openThreads",
+  );
+  assert.equal(
+    summary.totalSlaBreaches,
+    expectedBreaches,
+    "summary.totalSlaBreaches must equal sum of member slaBreaches",
+  );
 });
 
 test("topPerformer and bottleneck reference valid member IDs", async () => {
   const { members, summary } = await loadFixture();
   const memberIds = new Set(members.map((m) => m.memberId));
-  assert.ok(memberIds.has(summary.topPerformerId), "summary.topPerformerId must match a member in the fixture");
-  assert.ok(memberIds.has(summary.bottleneckMemberId), "summary.bottleneckMemberId must match a member in the fixture");
+  assert.ok(
+    memberIds.has(summary.topPerformerId),
+    "summary.topPerformerId must match a member in the fixture",
+  );
+  assert.ok(
+    memberIds.has(summary.bottleneckMemberId),
+    "summary.bottleneckMemberId must match a member in the fixture",
+  );
 });
 
 test("reviewRequiredMemberIds contains all members with SLA breaches", async () => {
@@ -103,8 +157,10 @@ test("reviewRequiredMemberIds contains all members with SLA breaches", async () 
   const reviewSet = new Set(summary.reviewRequiredMemberIds);
   for (const m of members) {
     if (m.slaBreaches > 0) {
-      assert.ok(reviewSet.has(m.memberId),
-        `${m.memberId} has slaBreaches > 0 and must be in reviewRequiredMemberIds`);
+      assert.ok(
+        reviewSet.has(m.memberId),
+        `${m.memberId} has slaBreaches > 0 and must be in reviewRequiredMemberIds`,
+      );
     }
   }
 });
@@ -122,6 +178,9 @@ test("bottleneck member has the highest open thread count", async () => {
   const bottleneck = members.find((m) => m.memberId === summary.bottleneckMemberId);
   assert.ok(bottleneck, "bottleneckMemberId must match a member");
   const maxOpen = Math.max(...members.map((m) => m.openThreads));
-  assert.equal(bottleneck.openThreads, maxOpen,
-    "bottleneck member must have the highest openThreads count");
+  assert.equal(
+    bottleneck.openThreads,
+    maxOpen,
+    "bottleneck member must have the highest openThreads count",
+  );
 });
