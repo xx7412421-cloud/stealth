@@ -46,7 +46,7 @@ export const fixDuplicateNames = (records: CampaignRecord[]): CampaignRecord[] =
  * Fixes invalid date strings and ensures the start date is not after the end date.
  */
 export const fixInvalidDates = (record: CampaignRecord): CampaignRecord => {
-  let fixed = { ...record };
+  const fixed = { ...record };
   let changed = false;
 
   const isValidDate = (d: string) => !isNaN(Date.parse(d));
