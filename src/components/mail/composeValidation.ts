@@ -28,6 +28,8 @@ export type ComposeDraft = {
   blockedRecipients?: string[];
   /** Optional policy quote from the API — used to gate on trust/blocked/minimum postage. */
   policyQuote?: PostageQuote | null;
+  /** Optional pre-resolved recipients. If omitted, we check only initial status. */
+  resolvedRecipients?: RecipientReadiness[];
 };
 
 export type ComposeSubmission = {
@@ -82,8 +84,9 @@ export function validateComposeDraft({
   postage,
   blockedRecipients = [],
   policyQuote,
+  resolvedRecipients,
 }: ComposeDraft) {
-  const recipients = getRecipientReadiness(to, postage, blockedRecipients);
+  const recipients = resolvedRecipients ?? getRecipientReadiness(to, postage, blockedRecipients);
 
   if (!recipients.length) return "Please enter a recipient";
   if (!body.trim()) return "Please enter a message";
@@ -94,15 +97,23 @@ export function validateComposeDraft({
   }
 
   // Check for blocked recipients (local blocklist or resolver result)
-  if (recipients.some((recipient) => recipient.state === "blocked")) {
+  if (
+    recipients.some(
+      (recipient) => recipient.state === "blocked" || recipient.policyType === "block",
+    )
+  ) {
     return "Remove blocked recipients before sending";
   }
 
-  // Check for unresolved or invalid recipients (unless explicitly allowed by future rules)
-  if (
-    recipients.some((recipient) => recipient.state === "resolving" || recipient.state === "invalid")
-  ) {
-    return "All recipients must be verified before sending";
+  // Check for unresolved or invalid recipients if we have pre-resolved list
+  if (resolvedRecipients) {
+    if (
+      recipients.some(
+        (recipient) => recipient.state === "resolving" || recipient.state === "invalid",
+      )
+    ) {
+      return "All recipients must be verified before sending";
+    }
   }
 
   // Trusted senders skip postage check entirely
@@ -116,8 +127,7 @@ export function validateComposeDraft({
     const minimumStroops = BigInt(policyQuote.amount);
     if (postageStroops < minimumStroops) {
       try {
-        const minimumXlm =
-          Number(minimumStroops) / 10_000_000;
+        const minimumXlm = Number(minimumStroops) / 10_000_000;
         return `Postage below recipient's minimum (${minimumXlm} XLM required)`;
       } catch {
         return "Postage below recipient's minimum";
