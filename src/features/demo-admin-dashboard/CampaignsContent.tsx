@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { GitMerge, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Draft } from "../types/draft";
-import { CampaignMessageAssignmentPanel } from "./CampaignMessageAssignmentPanel";
+import type { Draft } from "./types/draft";
+import { CampaignMessageAssignmentPanel } from "./components/CampaignMessageAssignmentPanel";
 import { CampaignSnapshots } from "./CampaignSnapshots";
-import { defaultCampaignSnapshots } from "../fixtures/campaignSnapshotFixtures";
+import { defaultCampaignSnapshots } from "./fixtures/campaignSnapshotFixtures";
 
 export function CampaignsContent() {
   const [campaignSubView, setCampaignSubView] = useState<"assignments" | "snapshots">(
@@ -45,9 +45,7 @@ export function CampaignsContent() {
         })}
       </div>
 
-      {campaignSubView === "assignments" && (
-        <CampaignMessageAssignmentPanel dataset={campaignDraftDataset} />
-      )}
+      {campaignSubView === "assignments" && <CampaignMessageAssignmentPanel />}
       {campaignSubView === "snapshots" && (
         <CampaignSnapshots
           currentDataset={campaignDraftDataset}

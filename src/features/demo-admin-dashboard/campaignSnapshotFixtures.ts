@@ -1,4 +1,4 @@
-import type { CampaignSnapshot } from "../types/campaignSnapshot";
+import type { CampaignSnapshot } from "./types/campaignSnapshot";
 
 /**
  * Default campaign snapshots for the demo admin dashboard.

@@ -31,7 +31,7 @@ import type {
 } from "./types";
 import { TemplatePicker } from "./templates";
 import { AdminDataTable, type Column } from "./components/AdminDataTable";
-import { CampaignsContent } from "./components/CampaignsContent";
+import { CampaignsContent } from "./CampaignsContent";
 import { PRESET_SCENARIOS } from "./fixtures/presets";
 
 // ─── Default Deterministic fake data ──────────────────────────────────────────

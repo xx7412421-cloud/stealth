@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Archive, Clock, FilePlus, Trash2, Undo } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CampaignSnapshot } from "../types/campaignSnapshot";
-import type { Draft } from "../types/draft";
-import { defaultCampaignSnapshots } from "../fixtures/campaignSnapshotFixtures";
+import type { CampaignSnapshot } from "./types/campaignSnapshot";
+import type { Draft } from "./types/draft";
+import { defaultCampaignSnapshots } from "./fixtures/campaignSnapshotFixtures";
 
 const STORAGE_KEY = "stealth-demo-campaign-snapshots";
 
