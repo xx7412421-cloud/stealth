@@ -43,6 +43,7 @@ This document defines threat assumptions, unsafe inputs, and mitigation strategi
 **Threat:** Email address injection, header injection, command injection
 
 **Validation:**
+
 ```typescript
 - Must match RFC 5322 email format
 - Length < 254 characters
@@ -52,19 +53,20 @@ This document defines threat assumptions, unsafe inputs, and mitigation strategi
 ```
 
 **Implementation:**
+
 ```typescript
 function validateEmail(email: string): ValidationError | null {
   const maxLength = 254;
   const rfc5322 = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   if (!email || email.length > maxLength) {
-    return { field: 'email', message: 'Invalid email length', code: 'INVALID_LENGTH' };
+    return { field: "email", message: "Invalid email length", code: "INVALID_LENGTH" };
   }
-  
+
   if (!rfc5322.test(email.trim())) {
-    return { field: 'email', message: 'Invalid email format', code: 'INVALID_FORMAT' };
+    return { field: "email", message: "Invalid email format", code: "INVALID_FORMAT" };
   }
-  
+
   return null;
 }
 ```
@@ -74,6 +76,7 @@ function validateEmail(email: string): ValidationError | null {
 **Threat:** XSS through stored names, command injection in display
 
 **Validation:**
+
 ```typescript
 - Length < 200 characters
 - No control characters (U+0000 to U+001F, U+007F to U+009F)
@@ -82,10 +85,11 @@ function validateEmail(email: string): ValidationError | null {
 ```
 
 **Implementation:**
+
 ```typescript
 function sanitizeTeamMemberName(name: string): string {
   // Remove control characters
-  let sanitized = name.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+  let sanitized = name.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
   // Trim whitespace
   sanitized = sanitized.trim();
   // Max length
@@ -101,6 +105,7 @@ function sanitizeTeamMemberName(name: string): string {
 **Threat:** ReDoS (Regular Expression Denial of Service), infinite loops, resource exhaustion
 
 **Validation:**
+
 ```typescript
 - If daily: time must be HH:MM format (00:00-23:59)
 - If weekly: day 0-6, time HH:MM format
@@ -111,61 +116,62 @@ function sanitizeTeamMemberName(name: string): string {
 ```
 
 **Implementation:**
+
 ```typescript
 function validateScheduleExpression(schedule: ScheduleExpression): ValidationError | null {
   const { type, value, timezone } = schedule;
-  
+
   // Validate timezone if provided
   if (timezone && !isValidTimezone(timezone)) {
-    return { field: 'timezone', message: 'Invalid timezone', code: 'INVALID_TIMEZONE' };
+    return { field: "timezone", message: "Invalid timezone", code: "INVALID_TIMEZONE" };
   }
-  
-  if (type === 'daily') {
+
+  if (type === "daily") {
     const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(value)) {
-      return { field: 'schedule', message: 'Invalid daily time format', code: 'INVALID_TIME' };
+      return { field: "schedule", message: "Invalid daily time format", code: "INVALID_TIME" };
     }
-  } else if (type === 'weekly') {
+  } else if (type === "weekly") {
     const weeklyRegex = /^[0-6]\s([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
     if (!weeklyRegex.test(value)) {
-      return { field: 'schedule', message: 'Invalid weekly format', code: 'INVALID_WEEKLY' };
+      return { field: "schedule", message: "Invalid weekly format", code: "INVALID_WEEKLY" };
     }
-  } else if (type === 'cron') {
+  } else if (type === "cron") {
     const cronError = validateCronExpression(value);
     if (cronError) return cronError;
   }
-  
+
   return null;
 }
 
 function validateCronExpression(cron: string): ValidationError | null {
   const parts = cron.trim().split(/\s+/);
-  
+
   if (parts.length !== 5) {
-    return { field: 'schedule', message: 'Cron must have 5 fields', code: 'INVALID_CRON' };
+    return { field: "schedule", message: "Cron must have 5 fields", code: "INVALID_CRON" };
   }
-  
+
   const [minute, hour, day, month, weekday] = parts;
-  
+
   // Prevent ReDoS by checking part length
-  if (parts.some(p => p.length > 50)) {
-    return { field: 'schedule', message: 'Cron field too complex', code: 'CRON_TOO_COMPLEX' };
+  if (parts.some((p) => p.length > 50)) {
+    return { field: "schedule", message: "Cron field too complex", code: "CRON_TOO_COMPLEX" };
   }
-  
+
   const ranges = [
-    { field: minute, min: 0, max: 59, name: 'minute' },
-    { field: hour, min: 0, max: 23, name: 'hour' },
-    { field: day, min: 1, max: 31, name: 'day' },
-    { field: month, min: 1, max: 12, name: 'month' },
-    { field: weekday, min: 0, max: 6, name: 'weekday' },
+    { field: minute, min: 0, max: 59, name: "minute" },
+    { field: hour, min: 0, max: 23, name: "hour" },
+    { field: day, min: 1, max: 31, name: "day" },
+    { field: month, min: 1, max: 12, name: "month" },
+    { field: weekday, min: 0, max: 6, name: "weekday" },
   ];
-  
+
   for (const { field, min, max, name } of ranges) {
     if (!isValidCronField(field, min, max)) {
-      return { field: 'schedule', message: `Invalid cron ${name}`, code: 'INVALID_CRON_FIELD' };
+      return { field: "schedule", message: `Invalid cron ${name}`, code: "INVALID_CRON_FIELD" };
     }
   }
-  
+
   return null;
 }
 ```
@@ -175,6 +181,7 @@ function validateCronExpression(cron: string): ValidationError | null {
 **Threat:** Injection attacks in filter patterns, memory exhaustion from large exclusion lists
 
 **Validation:**
+
 ```typescript
 - Max 1000 exclusion rules per digest
 - Each rule max 500 characters
@@ -183,15 +190,20 @@ function validateCronExpression(cron: string): ValidationError | null {
 ```
 
 **Implementation:**
+
 ```typescript
 function validateFilterRules(filters: DigestFilters): ValidationError | null {
   if (filters.excludeSenders) {
     if (filters.excludeSenders.length > 1000) {
-      return { field: 'excludeSenders', message: 'Too many exclusion rules', code: 'TOO_MANY_RULES' };
+      return {
+        field: "excludeSenders",
+        message: "Too many exclusion rules",
+        code: "TOO_MANY_RULES",
+      };
     }
     for (const sender of filters.excludeSenders) {
       if (sender.length > 500) {
-        return { field: 'excludeSenders', message: 'Rule too long', code: 'RULE_TOO_LONG' };
+        return { field: "excludeSenders", message: "Rule too long", code: "RULE_TOO_LONG" };
       }
       const err = validateEmail(sender);
       if (err) return err;
@@ -210,6 +222,7 @@ function validateFilterRules(filters: DigestFilters): ValidationError | null {
 **Threat:** XSS, malicious scripts, phishing content, browser exploits
 
 **Sanitization Rules:**
+
 ```typescript
 - Remove all <script>, <iframe>, <object>, <embed> tags
 - Remove event handlers (onclick, onerror, onload, etc.)
@@ -222,26 +235,27 @@ function validateFilterRules(filters: DigestFilters): ValidationError | null {
 ```
 
 **Implementation:**
+
 ```typescript
 function sanitizeEmailContent(html: string): string {
   // Remove dangerous tags
   let sanitized = html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-    .replace(/<embed\b[^<]*>/gi, '');
-  
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
+    .replace(/<embed\b[^<]*>/gi, "");
+
   // Remove event handlers
   sanitized = sanitized
-    .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
-    .replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '');
-  
+    .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/\s*on\w+\s*=\s*[^\s>]*/gi, "");
+
   // Remove dangerous protocols
   sanitized = sanitized.replace(/href\s*=\s*["']?(?:javascript|data|vbscript):/gi, 'href="#"');
-  
+
   // Remove style attributes to prevent CSS-based attacks
-  sanitized = sanitized.replace(/\s*style\s*=\s*["'][^"']*["']/gi, '');
-  
+  sanitized = sanitized.replace(/\s*style\s*=\s*["'][^"']*["']/gi, "");
+
   return sanitized;
 }
 ```
@@ -251,6 +265,7 @@ function sanitizeEmailContent(html: string): string {
 **Threat:** Injection attacks, encoding attacks, control characters
 
 **Sanitization Rules:**
+
 ```typescript
 - Remove control characters (U+0000 to U+001F, U+007F to U+009F)
 - Remove null bytes
@@ -260,23 +275,24 @@ function sanitizeEmailContent(html: string): string {
 ```
 
 **Implementation:**
+
 ```typescript
 function sanitizeEmailSubject(subject: string): string {
   // Remove control characters
-  let sanitized = subject.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
-  
+  let sanitized = subject.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
+
   // Safely decode MIME-encoded words
   try {
     sanitized = decodeMimeWord(sanitized);
   } catch {
     // If decoding fails, use original
   }
-  
+
   // Truncate
   if (sanitized.length > 500) {
     sanitized = sanitized.substring(0, 500);
   }
-  
+
   return sanitized;
 }
 ```
@@ -286,6 +302,7 @@ function sanitizeEmailSubject(subject: string): string {
 **Threat:** Malware delivery, zip bombs, path traversal, code execution
 
 **Validation Rules:**
+
 ```typescript
 - Filename must be < 255 characters
 - Filename must match [a-zA-Z0-9._\-] pattern
@@ -297,28 +314,41 @@ function sanitizeEmailSubject(subject: string): string {
 ```
 
 **Implementation:**
+
 ```typescript
-function validateAttachment(filename: string, mimeType: string, sizeBytes: number): ValidationError | null {
+function validateAttachment(
+  filename: string,
+  mimeType: string,
+  sizeBytes: number,
+): ValidationError | null {
   // Check length
   if (!filename || filename.length > 255) {
-    return { field: 'attachment', message: 'Invalid filename length', code: 'INVALID_FILENAME_LENGTH' };
+    return {
+      field: "attachment",
+      message: "Invalid filename length",
+      code: "INVALID_FILENAME_LENGTH",
+    };
   }
-  
+
   // Check for path traversal
-  if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-    return { field: 'attachment', message: 'Invalid filename format', code: 'PATH_TRAVERSAL' };
+  if (filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
+    return { field: "attachment", message: "Invalid filename format", code: "PATH_TRAVERSAL" };
   }
-  
+
   // Check allowed characters
   if (!/^[a-zA-Z0-9._\-]+$/.test(filename)) {
-    return { field: 'attachment', message: 'Filename contains invalid characters', code: 'INVALID_CHARACTERS' };
+    return {
+      field: "attachment",
+      message: "Filename contains invalid characters",
+      code: "INVALID_CHARACTERS",
+    };
   }
-  
+
   // Check size
   if (sizeBytes > 100 * 1024 * 1024) {
-    return { field: 'attachment', message: 'File too large', code: 'FILE_TOO_LARGE' };
+    return { field: "attachment", message: "File too large", code: "FILE_TOO_LARGE" };
   }
-  
+
   return null;
 }
 ```
@@ -400,6 +430,7 @@ If a security issue is discovered:
 ## Future Considerations
 
 When integrating with main app:
+
 - Ensure authentication checks
 - Verify user has permission to modify digest
 - Audit trail for configuration changes

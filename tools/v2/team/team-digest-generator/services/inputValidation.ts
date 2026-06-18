@@ -3,7 +3,13 @@
  * Handles validation of user input and configuration
  */
 
-import { DigestConfig, DigestFilters, ScheduleExpression, TeamMember, ValidationError } from '../types';
+import {
+  DigestConfig,
+  DigestFilters,
+  ScheduleExpression,
+  TeamMember,
+  ValidationError,
+} from "../types";
 
 /**
  * Validation error result
@@ -22,26 +28,26 @@ export function validateEmail(email: string): ValidationError | null {
 
   if (!email) {
     return {
-      field: 'email',
-      message: 'Email is required',
-      code: 'REQUIRED',
+      field: "email",
+      message: "Email is required",
+      code: "REQUIRED",
     };
   }
 
   if (email.length > maxLength) {
     return {
-      field: 'email',
+      field: "email",
       message: `Email exceeds max length of ${maxLength} characters`,
-      code: 'MAX_LENGTH_EXCEEDED',
+      code: "MAX_LENGTH_EXCEEDED",
     };
   }
 
   const trimmedEmail = email.trim();
   if (!basicEmailRegex.test(trimmedEmail)) {
     return {
-      field: 'email',
-      message: 'Invalid email format',
-      code: 'INVALID_FORMAT',
+      field: "email",
+      message: "Invalid email format",
+      code: "INVALID_FORMAT",
     };
   }
 
@@ -52,10 +58,10 @@ export function validateEmail(email: string): ValidationError | null {
  * Sanitize team member name - remove control characters and enforce length limits
  */
 export function sanitizeTeamMemberName(name: string): string {
-  if (!name) return '';
+  if (!name) return "";
 
   // Remove control characters (U+0000-U+001F, U+007F-U+009F)
-  let sanitized = name.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+  let sanitized = name.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
 
   // Trim whitespace
   sanitized = sanitized.trim();
@@ -75,28 +81,28 @@ export function sanitizeTeamMemberName(name: string): string {
 export function validateTeamMember(member: any): ValidationError | null {
   if (!member) {
     return {
-      field: 'teamMember',
-      message: 'Team member is required',
-      code: 'REQUIRED',
+      field: "teamMember",
+      message: "Team member is required",
+      code: "REQUIRED",
     };
   }
 
   const emailError = validateEmail(member.email);
   if (emailError) return emailError;
 
-  if (!member.name || typeof member.name !== 'string') {
+  if (!member.name || typeof member.name !== "string") {
     return {
-      field: 'name',
-      message: 'Team member name is required',
-      code: 'REQUIRED',
+      field: "name",
+      message: "Team member name is required",
+      code: "REQUIRED",
     };
   }
 
   if (member.name.length > 200) {
     return {
-      field: 'name',
-      message: 'Team member name exceeds max length of 200 characters',
-      code: 'MAX_LENGTH_EXCEEDED',
+      field: "name",
+      message: "Team member name exceeds max length of 200 characters",
+      code: "MAX_LENGTH_EXCEEDED",
     };
   }
 
@@ -108,11 +114,11 @@ export function validateTeamMember(member: any): ValidationError | null {
  * Prevents ReDoS by limiting field complexity
  */
 export function validateCronExpression(cron: string): ValidationError | null {
-  if (!cron || typeof cron !== 'string') {
+  if (!cron || typeof cron !== "string") {
     return {
-      field: 'cron',
-      message: 'Cron expression is required',
-      code: 'REQUIRED',
+      field: "cron",
+      message: "Cron expression is required",
+      code: "REQUIRED",
     };
   }
 
@@ -120,9 +126,9 @@ export function validateCronExpression(cron: string): ValidationError | null {
 
   if (parts.length !== 5) {
     return {
-      field: 'cron',
-      message: 'Cron expression must have exactly 5 fields (minute hour day month weekday)',
-      code: 'INVALID_FIELD_COUNT',
+      field: "cron",
+      message: "Cron expression must have exactly 5 fields (minute hour day month weekday)",
+      code: "INVALID_FIELD_COUNT",
     };
   }
 
@@ -131,20 +137,20 @@ export function validateCronExpression(cron: string): ValidationError | null {
   for (let i = 0; i < parts.length; i++) {
     if (parts[i].length > maxFieldLength) {
       return {
-        field: 'cron',
+        field: "cron",
         message: `Cron field ${i} exceeds max complexity (max ${maxFieldLength} chars)`,
-        code: 'FIELD_TOO_COMPLEX',
+        code: "FIELD_TOO_COMPLEX",
       };
     }
   }
 
   // Validate each field
   const ranges = [
-    { min: 0, max: 59, name: 'minute' },
-    { min: 0, max: 23, name: 'hour' },
-    { min: 1, max: 31, name: 'day' },
-    { min: 1, max: 12, name: 'month' },
-    { min: 0, max: 6, name: 'weekday' },
+    { min: 0, max: 59, name: "minute" },
+    { min: 0, max: 23, name: "hour" },
+    { min: 1, max: 31, name: "day" },
+    { min: 1, max: 12, name: "month" },
+    { min: 0, max: 6, name: "weekday" },
   ];
 
   for (let i = 0; i < parts.length; i++) {
@@ -159,17 +165,22 @@ export function validateCronExpression(cron: string): ValidationError | null {
 /**
  * Validate a single cron field
  */
-function validateCronField(field: string, min: number, max: number, name: string): ValidationError | null {
-  if (field === '*') return null; // Wildcard is always valid
+function validateCronField(
+  field: string,
+  min: number,
+  max: number,
+  name: string,
+): ValidationError | null {
+  if (field === "*") return null; // Wildcard is always valid
 
   // Handle ranges (0-5)
-  if (field.includes('-')) {
-    const parts = field.split('-');
+  if (field.includes("-")) {
+    const parts = field.split("-");
     if (parts.length !== 2) {
       return {
-        field: 'cron',
+        field: "cron",
         message: `Invalid ${name} range format`,
-        code: 'INVALID_RANGE',
+        code: "INVALID_RANGE",
       };
     }
 
@@ -178,17 +189,17 @@ function validateCronField(field: string, min: number, max: number, name: string
 
     if (isNaN(start) || isNaN(end)) {
       return {
-        field: 'cron',
+        field: "cron",
         message: `Invalid ${name} range values`,
-        code: 'INVALID_RANGE_VALUES',
+        code: "INVALID_RANGE_VALUES",
       };
     }
 
     if (start < min || end > max || start > end) {
       return {
-        field: 'cron',
+        field: "cron",
         message: `${name} range out of valid bounds (${min}-${max})`,
-        code: 'RANGE_OUT_OF_BOUNDS',
+        code: "RANGE_OUT_OF_BOUNDS",
       };
     }
 
@@ -196,15 +207,15 @@ function validateCronField(field: string, min: number, max: number, name: string
   }
 
   // Handle comma-separated values (1,2,3)
-  if (field.includes(',')) {
-    const values = field.split(',');
+  if (field.includes(",")) {
+    const values = field.split(",");
     for (const val of values) {
       const num = parseInt(val.trim(), 10);
       if (isNaN(num) || num < min || num > max) {
         return {
-          field: 'cron',
+          field: "cron",
           message: `Invalid ${name} value: ${val}`,
-          code: 'INVALID_VALUE',
+          code: "INVALID_VALUE",
         };
       }
     }
@@ -212,15 +223,15 @@ function validateCronField(field: string, min: number, max: number, name: string
   }
 
   // Handle step values (*/5, 0-30/5)
-  if (field.includes('/')) {
-    const [range, step] = field.split('/');
+  if (field.includes("/")) {
+    const [range, step] = field.split("/");
     const stepNum = parseInt(step, 10);
 
     if (isNaN(stepNum) || stepNum <= 0) {
       return {
-        field: 'cron',
+        field: "cron",
         message: `Invalid ${name} step value`,
-        code: 'INVALID_STEP',
+        code: "INVALID_STEP",
       };
     }
 
@@ -232,9 +243,9 @@ function validateCronField(field: string, min: number, max: number, name: string
   const num = parseInt(field, 10);
   if (isNaN(num) || num < min || num > max) {
     return {
-      field: 'cron',
+      field: "cron",
       message: `Invalid ${name} value: must be between ${min} and ${max}`,
-      code: 'VALUE_OUT_OF_BOUNDS',
+      code: "VALUE_OUT_OF_BOUNDS",
     };
   }
 
@@ -247,59 +258,59 @@ function validateCronField(field: string, min: number, max: number, name: string
 export function validateScheduleExpression(schedule: any): ValidationError | null {
   if (!schedule) {
     return {
-      field: 'schedule',
-      message: 'Schedule expression is required',
-      code: 'REQUIRED',
+      field: "schedule",
+      message: "Schedule expression is required",
+      code: "REQUIRED",
     };
   }
 
   const { type, value, timezone } = schedule;
 
-  if (!type || !['daily', 'weekly', 'cron'].includes(type)) {
+  if (!type || !["daily", "weekly", "cron"].includes(type)) {
     return {
-      field: 'schedule.type',
-      message: 'Schedule type must be one of: daily, weekly, cron',
-      code: 'INVALID_TYPE',
+      field: "schedule.type",
+      message: "Schedule type must be one of: daily, weekly, cron",
+      code: "INVALID_TYPE",
     };
   }
 
-  if (!value || typeof value !== 'string') {
+  if (!value || typeof value !== "string") {
     return {
-      field: 'schedule.value',
-      message: 'Schedule value is required',
-      code: 'REQUIRED',
+      field: "schedule.value",
+      message: "Schedule value is required",
+      code: "REQUIRED",
     };
   }
 
-  if (type === 'daily') {
+  if (type === "daily") {
     const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(value.trim())) {
       return {
-        field: 'schedule.value',
-        message: 'Daily schedule must be in HH:MM format (00:00-23:59)',
-        code: 'INVALID_TIME_FORMAT',
+        field: "schedule.value",
+        message: "Daily schedule must be in HH:MM format (00:00-23:59)",
+        code: "INVALID_TIME_FORMAT",
       };
     }
-  } else if (type === 'weekly') {
+  } else if (type === "weekly") {
     const weeklyRegex = /^[0-6]\s([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
     if (!weeklyRegex.test(value.trim())) {
       return {
-        field: 'schedule.value',
+        field: "schedule.value",
         message: 'Weekly schedule must be in format "D HH:MM" where D is 0-6 (Sunday-Saturday)',
-        code: 'INVALID_WEEKLY_FORMAT',
+        code: "INVALID_WEEKLY_FORMAT",
       };
     }
-  } else if (type === 'cron') {
+  } else if (type === "cron") {
     const cronError = validateCronExpression(value);
     if (cronError) return cronError;
   }
 
-  if (timezone && typeof timezone === 'string') {
+  if (timezone && typeof timezone === "string") {
     if (!isValidTimezone(timezone)) {
       return {
-        field: 'schedule.timezone',
+        field: "schedule.timezone",
         message: `Invalid timezone: ${timezone}`,
-        code: 'INVALID_TIMEZONE',
+        code: "INVALID_TIMEZONE",
       };
     }
   }
@@ -313,20 +324,20 @@ export function validateScheduleExpression(schedule: any): ValidationError | nul
 export function isValidTimezone(tz: string): boolean {
   // Basic check for common timezones
   const commonZones = new Set([
-    'UTC',
-    'America/New_York',
-    'America/Chicago',
-    'America/Denver',
-    'America/Los_Angeles',
-    'Europe/London',
-    'Europe/Paris',
-    'Europe/Berlin',
-    'Asia/Tokyo',
-    'Asia/Shanghai',
-    'Asia/Hong_Kong',
-    'Asia/Singapore',
-    'Australia/Sydney',
-    'Pacific/Auckland',
+    "UTC",
+    "America/New_York",
+    "America/Chicago",
+    "America/Denver",
+    "America/Los_Angeles",
+    "Europe/London",
+    "Europe/Paris",
+    "Europe/Berlin",
+    "Asia/Tokyo",
+    "Asia/Shanghai",
+    "Asia/Hong_Kong",
+    "Asia/Singapore",
+    "Australia/Sydney",
+    "Pacific/Auckland",
   ]);
 
   if (commonZones.has(tz)) return true;
@@ -348,36 +359,36 @@ export function validateFilterRules(filters: any): ValidationError | null {
   if (filters.excludeSenders) {
     if (!Array.isArray(filters.excludeSenders)) {
       return {
-        field: 'filters.excludeSenders',
-        message: 'Exclude senders must be an array',
-        code: 'INVALID_TYPE',
+        field: "filters.excludeSenders",
+        message: "Exclude senders must be an array",
+        code: "INVALID_TYPE",
       };
     }
 
     if (filters.excludeSenders.length > 1000) {
       return {
-        field: 'filters.excludeSenders',
-        message: 'Too many exclusion rules (max 1000)',
-        code: 'TOO_MANY_RULES',
+        field: "filters.excludeSenders",
+        message: "Too many exclusion rules (max 1000)",
+        code: "TOO_MANY_RULES",
       };
     }
 
     for (let i = 0; i < filters.excludeSenders.length; i++) {
       const sender = filters.excludeSenders[i];
 
-      if (typeof sender !== 'string') {
+      if (typeof sender !== "string") {
         return {
-          field: 'filters.excludeSenders',
+          field: "filters.excludeSenders",
           message: `Exclude sender at index ${i} must be a string`,
-          code: 'INVALID_TYPE',
+          code: "INVALID_TYPE",
         };
       }
 
       if (sender.length > 500) {
         return {
-          field: 'filters.excludeSenders',
+          field: "filters.excludeSenders",
           message: `Exclude sender at index ${i} exceeds max length (max 500)`,
-          code: 'RULE_TOO_LONG',
+          code: "RULE_TOO_LONG",
         };
       }
 
@@ -395,27 +406,27 @@ export function validateFilterRules(filters: any): ValidationError | null {
   if (filters.excludeCategories) {
     if (!Array.isArray(filters.excludeCategories)) {
       return {
-        field: 'filters.excludeCategories',
-        message: 'Exclude categories must be an array',
-        code: 'INVALID_TYPE',
+        field: "filters.excludeCategories",
+        message: "Exclude categories must be an array",
+        code: "INVALID_TYPE",
       };
     }
 
     if (filters.excludeCategories.length > 100) {
       return {
-        field: 'filters.excludeCategories',
-        message: 'Too many category exclusions (max 100)',
-        code: 'TOO_MANY_CATEGORIES',
+        field: "filters.excludeCategories",
+        message: "Too many category exclusions (max 100)",
+        code: "TOO_MANY_CATEGORIES",
       };
     }
 
     for (let i = 0; i < filters.excludeCategories.length; i++) {
       const cat = filters.excludeCategories[i];
-      if (typeof cat !== 'string' || cat.length === 0 || cat.length > 50) {
+      if (typeof cat !== "string" || cat.length === 0 || cat.length > 50) {
         return {
-          field: 'filters.excludeCategories',
+          field: "filters.excludeCategories",
           message: `Category at index ${i} invalid (must be 1-50 characters)`,
-          code: 'INVALID_CATEGORY',
+          code: "INVALID_CATEGORY",
         };
       }
     }
@@ -426,9 +437,9 @@ export function validateFilterRules(filters: any): ValidationError | null {
     const importance = parseInt(filters.minImportance, 10);
     if (isNaN(importance) || importance < 0 || importance > 10) {
       return {
-        field: 'filters.minImportance',
-        message: 'Min importance must be a number between 0 and 10',
-        code: 'INVALID_VALUE',
+        field: "filters.minImportance",
+        message: "Min importance must be a number between 0 and 10",
+        code: "INVALID_VALUE",
       };
     }
   }
@@ -447,44 +458,44 @@ export function validateDigestConfig(config: any): ValidationResult {
       valid: false,
       errors: [
         {
-          field: 'config',
-          message: 'Configuration is required',
-          code: 'REQUIRED',
+          field: "config",
+          message: "Configuration is required",
+          code: "REQUIRED",
         },
       ],
     };
   }
 
   // Validate team ID
-  if (!config.teamId || typeof config.teamId !== 'string') {
+  if (!config.teamId || typeof config.teamId !== "string") {
     errors.push({
-      field: 'teamId',
-      message: 'Team ID is required',
-      code: 'REQUIRED',
+      field: "teamId",
+      message: "Team ID is required",
+      code: "REQUIRED",
     });
   }
 
   // Validate recipients
   if (!Array.isArray(config.recipients)) {
     errors.push({
-      field: 'recipients',
-      message: 'Recipients must be an array',
-      code: 'INVALID_TYPE',
+      field: "recipients",
+      message: "Recipients must be an array",
+      code: "INVALID_TYPE",
     });
   } else {
     if (config.recipients.length === 0) {
       errors.push({
-        field: 'recipients',
-        message: 'At least one recipient is required',
-        code: 'EMPTY_ARRAY',
+        field: "recipients",
+        message: "At least one recipient is required",
+        code: "EMPTY_ARRAY",
       });
     }
 
     if (config.recipients.length > 1000) {
       errors.push({
-        field: 'recipients',
-        message: 'Too many recipients (max 1000)',
-        code: 'TOO_MANY_RECIPIENTS',
+        field: "recipients",
+        message: "Too many recipients (max 1000)",
+        code: "TOO_MANY_RECIPIENTS",
       });
     }
 
@@ -503,9 +514,9 @@ export function validateDigestConfig(config: any): ValidationResult {
     for (const recipient of config.recipients) {
       if (emails.has(recipient.email)) {
         errors.push({
-          field: 'recipients',
+          field: "recipients",
           message: `Duplicate recipient: ${recipient.email}`,
-          code: 'DUPLICATE_RECIPIENT',
+          code: "DUPLICATE_RECIPIENT",
         });
       }
       emails.add(recipient.email);

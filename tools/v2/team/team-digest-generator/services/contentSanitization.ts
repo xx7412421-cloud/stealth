@@ -3,50 +3,50 @@
  * Handles sanitization of email content to prevent XSS and injection attacks
  */
 
-import { DigestEmail } from '../types';
+import { DigestEmail } from "../types";
 
 /**
  * Sanitize HTML email content
  * Removes dangerous tags, event handlers, and protocols
  */
 export function sanitizeEmailContent(html: string): string {
-  if (!html || typeof html !== 'string') {
-    return '';
+  if (!html || typeof html !== "string") {
+    return "";
   }
 
   let sanitized = html;
 
   // Remove script tags and content
-  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
 
   // Remove iframe tags
-  sanitized = sanitized.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+  sanitized = sanitized.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "");
 
   // Remove object tags
-  sanitized = sanitized.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
+  sanitized = sanitized.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "");
 
   // Remove embed tags
-  sanitized = sanitized.replace(/<embed\b[^<]*>/gi, '');
+  sanitized = sanitized.replace(/<embed\b[^<]*>/gi, "");
 
   // Remove form tags
-  sanitized = sanitized.replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, '');
+  sanitized = sanitized.replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, "");
 
   // Remove input elements
-  sanitized = sanitized.replace(/<input\b[^>]*>/gi, '');
+  sanitized = sanitized.replace(/<input\b[^>]*>/gi, "");
 
   // Remove button elements
-  sanitized = sanitized.replace(/<button\b[^>]*>/gi, '');
+  sanitized = sanitized.replace(/<button\b[^>]*>/gi, "");
 
   // Remove event handlers (onclick, onerror, onload, etc.)
-  sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
-  sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '');
+  sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, "");
+  sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, "");
 
   // Remove dangerous protocols (javascript:, data:, vbscript:)
   sanitized = sanitized.replace(/href\s*=\s*["']?(?:javascript|data|vbscript):/gi, 'href="#"');
   sanitized = sanitized.replace(/src\s*=\s*["']?(?:javascript|data|vbscript):/gi, 'src=""');
 
   // Remove style attributes (prevent CSS-based attacks)
-  sanitized = sanitized.replace(/\s*style\s*=\s*["'][^"']*["']/gi, '');
+  sanitized = sanitized.replace(/\s*style\s*=\s*["'][^"']*["']/gi, "");
 
   return sanitized;
 }
@@ -56,12 +56,12 @@ export function sanitizeEmailContent(html: string): string {
  * Removes control characters and handles encoding safely
  */
 export function sanitizeEmailSubject(subject: string): string {
-  if (!subject || typeof subject !== 'string') {
-    return '';
+  if (!subject || typeof subject !== "string") {
+    return "";
   }
 
   // Remove control characters (U+0000-U+001F, U+007F-U+009F)
-  let sanitized = subject.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+  let sanitized = subject.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
 
   // Truncate to max length
   const maxLength = 500;
@@ -76,8 +76,8 @@ export function sanitizeEmailSubject(subject: string): string {
  * Sanitize sender email address
  */
 export function sanitizeSenderEmail(email: string): string {
-  if (!email || typeof email !== 'string') {
-    return '';
+  if (!email || typeof email !== "string") {
+    return "";
   }
 
   // Basic sanitization - trim and limit length
@@ -96,19 +96,19 @@ export function sanitizeSenderEmail(email: string): string {
  * Prevents path traversal and other attacks
  */
 export function sanitizeFilename(filename: string): string {
-  if (!filename || typeof filename !== 'string') {
-    return '';
+  if (!filename || typeof filename !== "string") {
+    return "";
   }
 
   // Remove path components
-  let sanitized = filename.replace(/^.*[\\\/]/, '');
+  let sanitized = filename.replace(/^.*[\\\/]/, "");
 
   // Remove null bytes
-  sanitized = sanitized.replace(/\x00/g, '');
+  sanitized = sanitized.replace(/\x00/g, "");
 
   // Allow only safe characters: alphanumeric, dots, hyphens, underscores
   // First pass: replace unsafe characters with underscore
-  sanitized = sanitized.replace(/[^a-zA-Z0-9._\-]/g, '_');
+  sanitized = sanitized.replace(/[^a-zA-Z0-9._\-]/g, "_");
 
   // Truncate to max length
   const maxLength = 255;
@@ -135,16 +135,16 @@ export function sanitizeDigestEmail(email: DigestEmail): DigestEmail {
  * Escape HTML special characters for safe display
  */
 export function escapeHtml(text: string): string {
-  if (!text || typeof text !== 'string') {
-    return '';
+  if (!text || typeof text !== "string") {
+    return "";
   }
 
   const htmlEscapeMap: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
   };
 
   return text.replace(/[&<>"']/g, (char) => htmlEscapeMap[char]);
@@ -159,7 +159,7 @@ export function sanitizeForJson(obj: any): string {
     // JSON.stringify handles most escaping
     return JSON.stringify(obj);
   } catch {
-    return '{}';
+    return "{}";
   }
 }
 
@@ -185,31 +185,35 @@ export interface ValidatedAttachment {
  */
 export function validateAttachment(attachment: AttachmentMetadata): ValidatedAttachment {
   // Check filename
-  if (!attachment.filename || typeof attachment.filename !== 'string') {
+  if (!attachment.filename || typeof attachment.filename !== "string") {
     return {
-      filename: 'unknown',
-      sizeFormatted: '0 B',
+      filename: "unknown",
+      sizeFormatted: "0 B",
       valid: false,
-      error: 'Invalid filename',
+      error: "Invalid filename",
     };
   }
 
   if (attachment.filename.length > 255) {
     return {
       filename: attachment.filename.substring(0, 50),
-      sizeFormatted: '0 B',
+      sizeFormatted: "0 B",
       valid: false,
-      error: 'Filename too long',
+      error: "Filename too long",
     };
   }
 
   // Check for path traversal
-  if (attachment.filename.includes('..') || attachment.filename.includes('/') || attachment.filename.includes('\\')) {
+  if (
+    attachment.filename.includes("..") ||
+    attachment.filename.includes("/") ||
+    attachment.filename.includes("\\")
+  ) {
     return {
-      filename: 'unknown',
-      sizeFormatted: '0 B',
+      filename: "unknown",
+      sizeFormatted: "0 B",
       valid: false,
-      error: 'Invalid filename format',
+      error: "Invalid filename format",
     };
   }
 
@@ -220,7 +224,7 @@ export function validateAttachment(attachment: AttachmentMetadata): ValidatedAtt
       filename: sanitizeFilename(attachment.filename),
       sizeFormatted: formatBytes(attachment.sizeBytes),
       valid: false,
-      error: 'File too large (max 100 MB)',
+      error: "File too large (max 100 MB)",
     };
   }
 
@@ -235,13 +239,13 @@ export function validateAttachment(attachment: AttachmentMetadata): ValidatedAtt
  * Format bytes as human-readable size
  */
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) return "0 B";
 
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 /**

@@ -48,4 +48,3 @@ team-digest-generator/
 ## Future Integration
 
 This tool is designed as an isolated mini-product. If a future issue requires integration with the main app (dashboard, inbox, settings), that work should be in a separate issue with explicit approval to modify protected areas.
-

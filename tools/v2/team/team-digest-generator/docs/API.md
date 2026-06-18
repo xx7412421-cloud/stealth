@@ -7,21 +7,23 @@ All user input must be validated before processing. Use the `inputValidation` se
 ### Email Validation
 
 ```typescript
-import { validateEmail } from '../services/inputValidation';
+import { validateEmail } from "../services/inputValidation";
 
 // Returns null if valid, or ValidationError if invalid
-const error = validateEmail('user@example.com');
+const error = validateEmail("user@example.com");
 if (error) {
   console.error(error.message); // "Invalid email format"
 }
 ```
 
 **Valid email formats:**
+
 - `user@example.com`
 - `user+tag@example.com`
 - `first.last@sub.example.co.uk`
 
 **Rejected:**
+
 - No `@` symbol
 - Exceeds 254 characters
 - Control characters
@@ -30,12 +32,12 @@ if (error) {
 ### Team Member Validation
 
 ```typescript
-import { validateTeamMember } from '../services/inputValidation';
+import { validateTeamMember } from "../services/inputValidation";
 
 const member = {
-  id: 'user-1',
-  email: 'alice@example.com',
-  name: 'Alice Smith',
+  id: "user-1",
+  email: "alice@example.com",
+  name: "Alice Smith",
 };
 
 const error = validateTeamMember(member);
@@ -45,6 +47,7 @@ if (error) {
 ```
 
 **Requirements:**
+
 - `email`: Valid RFC 5322 format, < 254 chars
 - `name`: Non-empty, < 200 chars, no control characters
 - `id`: Unique string identifier
@@ -52,35 +55,38 @@ if (error) {
 ### Schedule Expression Validation
 
 ```typescript
-import { validateScheduleExpression } from '../services/inputValidation';
+import { validateScheduleExpression } from "../services/inputValidation";
 
 // Daily schedule
 const dailyError = validateScheduleExpression({
-  type: 'daily',
-  value: '09:00', // HH:MM format
-  timezone: 'America/New_York',
+  type: "daily",
+  value: "09:00", // HH:MM format
+  timezone: "America/New_York",
 });
 
 // Weekly schedule
 const weeklyError = validateScheduleExpression({
-  type: 'weekly',
-  value: '5 14:30', // day (0-6) HH:MM
+  type: "weekly",
+  value: "5 14:30", // day (0-6) HH:MM
 });
 
 // Cron expression
 const cronError = validateScheduleExpression({
-  type: 'cron',
-  value: '0 9 * * 1-5', // minute hour day month weekday
+  type: "cron",
+  value: "0 9 * * 1-5", // minute hour day month weekday
 });
 ```
 
 **Daily schedule:**
+
 - Format: `HH:MM` (24-hour, 00:00-23:59)
 
 **Weekly schedule:**
+
 - Format: `D HH:MM` where D is day 0-6 (0=Sunday)
 
 **Cron expression:**
+
 - 5-field format: `minute hour day month weekday`
 - Fields: 0-59, 0-23, 1-31, 1-12, 0-6
 - Supports: `*`, ranges (`0-5`), lists (`1,3,5`), steps (`*/5`)
@@ -89,34 +95,35 @@ const cronError = validateScheduleExpression({
 ### Digest Configuration Validation
 
 ```typescript
-import { validateDigestConfig } from '../services/inputValidation';
+import { validateDigestConfig } from "../services/inputValidation";
 
 const config = {
-  teamId: 'team-1',
+  teamId: "team-1",
   recipients: [
-    { id: 'user-1', email: 'alice@example.com', name: 'Alice' },
-    { id: 'user-2', email: 'bob@example.com', name: 'Bob' },
+    { id: "user-1", email: "alice@example.com", name: "Alice" },
+    { id: "user-2", email: "bob@example.com", name: "Bob" },
   ],
   schedule: {
-    type: 'daily',
-    value: '09:00',
-    timezone: 'UTC',
+    type: "daily",
+    value: "09:00",
+    timezone: "UTC",
   },
   filters: {
-    excludeSenders: ['spam@example.com'],
-    excludeCategories: ['notifications', 'updates'],
+    excludeSenders: ["spam@example.com"],
+    excludeCategories: ["notifications", "updates"],
   },
 };
 
 const result = validateDigestConfig(config);
 if (!result.valid) {
-  result.errors.forEach(error => {
+  result.errors.forEach((error) => {
     console.error(`${error.field}: ${error.message}`);
   });
 }
 ```
 
 **Configuration limits:**
+
 - Recipients: 1-1000
 - Exclusion rules: 0-1000
 - Date range: max 90 days
@@ -140,6 +147,7 @@ return <div dangerouslySetInnerHTML={{ __html: safe }} />;
 ```
 
 **Removes:**
+
 - Script tags and event handlers
 - Iframe, object, embed tags
 - Form elements
@@ -147,6 +155,7 @@ return <div dangerouslySetInnerHTML={{ __html: safe }} />;
 - Style attributes (prevents CSS-based attacks)
 
 **Preserves:**
+
 - Safe HTML tags (p, div, span, a, b, i, br, etc.)
 - Safe attributes (href with safe protocols, title, id)
 - Text content and formatting
@@ -154,14 +163,15 @@ return <div dangerouslySetInnerHTML={{ __html: safe }} />;
 ### Subject Line Sanitization
 
 ```typescript
-import { sanitizeEmailSubject } from '../services/contentSanitization';
+import { sanitizeEmailSubject } from "../services/contentSanitization";
 
-const subject = 'Meeting\x00Scheduled';
+const subject = "Meeting\x00Scheduled";
 const safe = sanitizeEmailSubject(subject);
 // Result: 'MeetingScheduled' (control chars removed)
 ```
 
 **Removes:**
+
 - Control characters (U+0000-U+001F, U+007F-U+009F)
 - Null bytes
 - Truncates to 500 characters
@@ -169,9 +179,9 @@ const safe = sanitizeEmailSubject(subject);
 ### Sender Email Sanitization
 
 ```typescript
-import { sanitizeSenderEmail } from '../services/contentSanitization';
+import { sanitizeSenderEmail } from "../services/contentSanitization";
 
-const from = 'attacker@example.com  ';
+const from = "attacker@example.com  ";
 const safe = sanitizeSenderEmail(from);
 // Result: 'attacker@example.com' (trimmed, validated)
 ```
@@ -179,11 +189,11 @@ const safe = sanitizeSenderEmail(from);
 ### Filename Sanitization
 
 ```typescript
-import { sanitizeFilename, validateAttachment } from '../services/contentSanitization';
+import { sanitizeFilename, validateAttachment } from "../services/contentSanitization";
 
 const attachment = {
-  filename: '../../etc/passwd',
-  mimeType: 'text/plain',
+  filename: "../../etc/passwd",
+  mimeType: "text/plain",
   sizeBytes: 1024,
 };
 
@@ -197,6 +207,7 @@ if (validated.valid) {
 ```
 
 **Filename rules:**
+
 - Removes path components
 - Removes null bytes
 - Allows only: `[a-zA-Z0-9._\-]`
@@ -204,6 +215,7 @@ if (validated.valid) {
 - Rejects path traversal patterns
 
 **Attachment rules:**
+
 - Max size: 100 MB per file
 - No content parsing or downloads
 - Metadata only
@@ -211,7 +223,7 @@ if (validated.valid) {
 ### HTML Escaping
 
 ```typescript
-import { escapeHtml } from '../services/contentSanitization';
+import { escapeHtml } from "../services/contentSanitization";
 
 const userInput = '<script>alert("xss")</script>';
 const safe = escapeHtml(userInput);
@@ -219,6 +231,7 @@ const safe = escapeHtml(userInput);
 ```
 
 **Use when:**
+
 - Displaying user-provided text in HTML context
 - Building user-generated content
 - Constructing HTML attributes
@@ -231,9 +244,9 @@ All validation functions return `ValidationError` or `ValidationResult`:
 
 ```typescript
 interface ValidationError {
-  field: string;    // Which field failed
-  message: string;  // User-friendly error message
-  code: string;     // Machine-readable error code
+  field: string; // Which field failed
+  message: string; // User-friendly error message
+  code: string; // Machine-readable error code
 }
 
 interface ValidationResult {
@@ -243,6 +256,7 @@ interface ValidationResult {
 ```
 
 **Common error codes:**
+
 - `REQUIRED` - Field is required
 - `INVALID_FORMAT` - Format is invalid
 - `MAX_LENGTH_EXCEEDED` - Value too long
@@ -256,17 +270,17 @@ interface ValidationResult {
 ```typescript
 try {
   const result = validateDigestConfig(config);
-  
+
   if (!result.valid) {
-    const errorMessages = result.errors.map(e => `${e.field}: ${e.message}`);
+    const errorMessages = result.errors.map((e) => `${e.field}: ${e.message}`);
     return { success: false, errors: errorMessages };
   }
-  
+
   // Process valid config
   return { success: true };
 } catch (err) {
   // Log unexpected errors securely (no sensitive data)
-  return { success: false, errors: ['Configuration validation failed'] };
+  return { success: false, errors: ["Configuration validation failed"] };
 }
 ```
 
@@ -299,15 +313,15 @@ function sanitizeWithCache(html: string): string {
   if (sanitizationCache.has(html)) {
     return sanitizationCache.get(html);
   }
-  
+
   const result = sanitizeEmailContent(html);
   sanitizationCache.set(html, result);
-  
+
   // Clear cache periodically
   if (sanitizationCache.size > 10000) {
     sanitizationCache.clear();
   }
-  
+
   return result;
 }
 ```
@@ -343,12 +357,12 @@ export function DigestConfigForm() {
 
   const handleSave = () => {
     const result = validateDigestConfig(config);
-    
+
     if (!result.valid) {
       setErrors(result.errors);
       return;
     }
-    
+
     // All validation passed, save config
     saveDigestConfig(config);
   };
@@ -396,6 +410,7 @@ export function DigestPreview({ emails }) {
 ## Testing
 
 See [security.example.test.ts](../tests/security.example.test.ts) for comprehensive test examples covering:
+
 - Input validation with malformed data
 - XSS prevention
 - Control character removal
