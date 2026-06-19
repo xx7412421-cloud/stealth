@@ -16,11 +16,7 @@ import {
   createMemoryPolicyApi,
   type PolicyApi,
 } from "./bulkPolicyWriter";
-import {
-  saveSession,
-  defaultRetentionForSource,
-  cleanExpiredSessions,
-} from "./dataRetention";
+import { saveSession, defaultRetentionForSource, cleanExpiredSessions } from "./dataRetention";
 import type {
   BulkWriteProgress,
   DataRetentionPolicy,

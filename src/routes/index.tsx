@@ -937,7 +937,9 @@ function MailApp({ isDemoMode }: { isDemoMode?: boolean }) {
           open={importOpen}
           onClose={() => setImportOpen(false)}
           onComplete={handleImportSave}
-          owner={emails.find((e) => e.email?.startsWith("G") || e.email?.includes("*"))?.email ?? ""}
+          owner={
+            emails.find((e) => e.email?.startsWith("G") || e.email?.includes("*"))?.email ?? ""
+          }
         />
 
         <SenderConversionDialog

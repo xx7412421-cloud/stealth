@@ -12,9 +12,7 @@ import type { ImportSession } from "@/features/contacts/import/types";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-function makeSession(
-  overrides: Partial<ImportSession> = {},
-): ImportSession {
+function makeSession(overrides: Partial<ImportSession> = {}): ImportSession {
   return {
     id: "test-session",
     source: "csv",
@@ -34,9 +32,15 @@ function mockLocalStorage() {
   const store = new Map<string, string>();
   const storage = {
     getItem: vi.fn((key: string) => store.get(key) ?? null),
-    setItem: vi.fn((key: string, value: string) => { store.set(key, value); }),
-    removeItem: vi.fn((key: string) => { store.delete(key); }),
-    clear: vi.fn(() => { store.clear(); }),
+    setItem: vi.fn((key: string, value: string) => {
+      store.set(key, value);
+    }),
+    removeItem: vi.fn((key: string) => {
+      store.delete(key);
+    }),
+    clear: vi.fn(() => {
+      store.clear();
+    }),
   };
   vi.stubGlobal("localStorage", storage);
   return { store, storage };
