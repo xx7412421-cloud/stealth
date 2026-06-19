@@ -2,12 +2,7 @@
  * Preset copy for the demo admin dashboard empty states. Each entry is static,
  * fake, and safe for public review — no real user data, addresses, or secrets.
  */
-export type AdminEmptyStateKind =
-  | "messages"
-  | "senders"
-  | "attachments"
-  | "events"
-  | "validation";
+export type AdminEmptyStateKind = "messages" | "senders" | "attachments" | "events" | "validation";
 
 export interface AdminEmptyStateCopy {
   /** Short, friendly heading. */
@@ -18,10 +13,7 @@ export interface AdminEmptyStateCopy {
   ctaLabel?: string;
 }
 
-export const ADMIN_EMPTY_STATE_PRESETS: Record<
-  AdminEmptyStateKind,
-  AdminEmptyStateCopy
-> = {
+export const ADMIN_EMPTY_STATE_PRESETS: Record<AdminEmptyStateKind, AdminEmptyStateCopy> = {
   messages: {
     title: "No messages yet",
     description: "Demo messages will show here once the dataset loads.",
@@ -50,9 +42,7 @@ export const ADMIN_EMPTY_STATE_PRESETS: Record<
 };
 
 /** Look up the preset copy for a given empty-state kind. */
-export function getAdminEmptyStatePreset(
-  kind: AdminEmptyStateKind,
-): AdminEmptyStateCopy {
+export function getAdminEmptyStatePreset(kind: AdminEmptyStateKind): AdminEmptyStateCopy {
   return ADMIN_EMPTY_STATE_PRESETS[kind];
 }
 
