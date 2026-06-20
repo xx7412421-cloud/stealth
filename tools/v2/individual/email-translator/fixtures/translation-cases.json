@@ -1,0 +1,38 @@
+[
+  {
+    "id": "support-reply-es-en",
+    "subject": "Actualizacion sobre su solicitud",
+    "body": "Hola,\n\nRecibimos su mensaje y estamos revisando los detalles. Le enviaremos una respuesta antes del viernes.\n\nGracias.",
+    "sourceLanguage": "es",
+    "targetLanguage": "en",
+    "preserveFormatting": true,
+    "expectedWarnings": []
+  },
+  {
+    "id": "project-update-fr-en",
+    "subject": "Resume du projet",
+    "body": "Bonjour,\n\n- La maquette est prete.\n- Les tests de contenu continuent.\n- La revision finale est prevue demain.\n\nCordialement.",
+    "sourceLanguage": "fr",
+    "targetLanguage": "en",
+    "preserveFormatting": true,
+    "expectedWarnings": []
+  },
+  {
+    "id": "oversized-draft-de-en",
+    "subject": "Langer Entwurf",
+    "body": "Dies ist ein synthetischer langer E-Mail-Entwurf, der in zukunftigen Tests mehrfach wiederholt werden kann, um Groessenbegrenzungen und Aufteilung zu pruefen.",
+    "sourceLanguage": "de",
+    "targetLanguage": "en",
+    "preserveFormatting": false,
+    "expectedWarnings": ["content-size-limit"]
+  },
+  {
+    "id": "missing-target-language",
+    "subject": "Missing target language",
+    "body": "This fixture should fail validation because the target language is empty.",
+    "sourceLanguage": "en",
+    "targetLanguage": "",
+    "preserveFormatting": true,
+    "expectedWarnings": ["validation-target-language"]
+  }
+]
