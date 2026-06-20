@@ -476,3 +476,11 @@ export { LabelManager } from "./labels/LabelManager";
 // Draft dataset JSON import (issue #272): JSON -> safe drafts mapper with error output.
 export { mapImportedDataset, parseDatasetImport } from "./helpers/datasetImport";
 export type { DatasetImportIssue, DatasetImportResult } from "./types/datasetImport";
+
+// Scenario registry and loader (issue #216): load demo scenarios into draft state.
+export {
+  createScenarioRegistry,
+  demoScenarios,
+  loadScenarioIntoDraft,
+} from "./helpers/scenarioRegistry";
+export type { DemoScenario, ScenarioLoadMode, ScenarioRegistry } from "./types/scenario";
