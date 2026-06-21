@@ -6,6 +6,7 @@ import type {
   DeadlineUrgency,
   DetectedDeadline,
 } from "../types";
+import { normalizeDeadlineMessages } from "./input-guards";
 
 const ISO_DATE_PATTERN = /\b(20\d{2})-(\d{2})-(\d{2})\b/;
 const US_DATE_PATTERN = /\b(\d{1,2})\/(\d{1,2})\/(20\d{2})\b/;
@@ -133,8 +134,14 @@ export function detectDeadlines(
 ): DeadlineDetectionResult {
   const now = new Date(options.now ?? new Date().toISOString());
   const defaultTimezone = options.defaultTimezone ?? "UTC";
+  const normalizedMessages = normalizeDeadlineMessages(messages, {
+    defaultTimezone,
+    maxBodyChars: options.maxBodyChars,
+    maxMessages: options.maxMessages,
+    maxSubjectChars: options.maxSubjectChars,
+  });
 
-  const deadlines = messages.map((message): DetectedDeadline => {
+  const deadlines = normalizedMessages.map((message): DetectedDeadline => {
     const combinedText = `${message.subject}\n${message.body}`;
     const dueDate = normalizeDateFromText(combinedText, now);
     const dueTime = normalizeTimeFromText(combinedText);
@@ -182,7 +189,7 @@ export function detectDeadlines(
       return acc;
     },
     {
-      totalMessages: messages.length,
+      totalMessages: normalizedMessages.length,
       totalDeadlines: 0,
       detected: 0,
       needsReview: 0,
