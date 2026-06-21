@@ -1,0 +1,78 @@
+{
+  "tool": "collision-detection",
+  "version": "v1",
+  "cases": [
+    {
+      "id": "exact-whitespace-duplicate",
+      "description": "Same recipient, subject, and body with extra whitespace.",
+      "existingDraft": {
+        "recipient": "ops@example.test",
+        "subject": "Invoice follow-up",
+        "body": "Thanks for the update. We will review the invoice today."
+      },
+      "candidateDraft": {
+        "recipient": "ops@example.test",
+        "subject": "Invoice follow-up",
+        "body": "Thanks for the update.   We will review the invoice today."
+      },
+      "expected": {
+        "classification": "duplicate",
+        "action": "block"
+      }
+    },
+    {
+      "id": "near-duplicate-summary",
+      "description": "Same intent with shorter wording should require human review.",
+      "existingDraft": {
+        "recipient": "partner@example.test",
+        "subject": "Launch checklist",
+        "body": "The launch checklist is ready. Please confirm the final owner by Friday."
+      },
+      "candidateDraft": {
+        "recipient": "partner@example.test",
+        "subject": "Launch checklist",
+        "body": "Checklist is ready. Please confirm the owner by Friday."
+      },
+      "expected": {
+        "classification": "possible_duplicate",
+        "action": "review"
+      }
+    },
+    {
+      "id": "different-recipient-distinct-body",
+      "description": "Same subject but different recipient and content should remain available.",
+      "existingDraft": {
+        "recipient": "ops@example.test",
+        "subject": "Weekly status",
+        "body": "We shipped the first analytics milestone."
+      },
+      "candidateDraft": {
+        "recipient": "finance@example.test",
+        "subject": "Weekly status",
+        "body": "The invoice export is ready for finance review."
+      },
+      "expected": {
+        "classification": "distinct",
+        "action": "allow"
+      }
+    },
+    {
+      "id": "missing-candidate-body",
+      "description": "A blank candidate body should not be treated as safe output.",
+      "existingDraft": {
+        "recipient": "support@example.test",
+        "subject": "Support reply",
+        "body": "We can help troubleshoot the issue today."
+      },
+      "candidateDraft": {
+        "recipient": "support@example.test",
+        "subject": "Support reply",
+        "body": ""
+      },
+      "expected": {
+        "classification": "invalid",
+        "action": "block"
+      }
+    }
+  ]
+}
