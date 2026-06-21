@@ -1,41 +1,41 @@
-# Grammar Cleaner
-
-Correct grammar and writing issues.
-
-## Scope
-
-- Release tier: $(System.Collections.Hashtable.Tier.ToUpperInvariant())
-- Audience: $(System.Collections.Hashtable.Audience)
-- Folder ownership: $dir/
-
-This is a self-contained tooling workspace. Do not wire this tool into the main app, routing, inbox architecture, wallet core, Stellar core, or design system unless a future integration issue explicitly allows it.
-
-Recommended internal structure:
-
-- components/
-- services/
-- hooks/
--     ests/
-- docs/
-  "@ | Set-Content -Path "tools/v1/individual/grammar-cleaner/README.md"
-  @"
-
 # Grammar Cleaner Specs
 
 ## Purpose
 
-Correct grammar and writing issues.
+Correct grammar and writing issues in individual email drafts while preserving
+the original meaning and leaving the user in control before anything is sent.
 
-## Contributor boundary
+## Contributor Boundary
 
-All work for this tool should stay in:
+All work for this tool must stay in:
 
-$dir/
+`tools/v1/individual/grammar-cleaner/`
 
-## Required issue categories
+The tool is a self-contained V1 workspace. Do not wire it into the main app,
+routing, inbox architecture, wallet core, Stellar core, database schema, or
+shared design system unless a future integration issue explicitly allows it.
+
+## Recommended Internal Structure
+
+- `components/`
+- `services/`
+- `hooks/`
+- `tests/`
+- `docs/`
+
+## Required Issue Categories
 
 - Architecture
 - Feature
 - UI and accessibility
 - Security and performance
 - Testing and documentation
+
+## UI Expectations
+
+- Accept a draft email body and show an empty state before input.
+- Expose a local preview flow with loading, error, and success states.
+- Label every interactive control.
+- Use native keyboard-accessible controls.
+- Announce status changes through a single live region.
+- Keep the result reviewable and focusable before any future send integration.
