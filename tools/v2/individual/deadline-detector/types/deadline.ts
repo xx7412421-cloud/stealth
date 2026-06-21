@@ -48,4 +48,7 @@ export interface DeadlineDetectionResult {
 export interface DeadlineDetectorServiceOptions {
   now?: string;
   defaultTimezone?: string;
+  maxMessages?: number;
+  maxSubjectChars?: number;
+  maxBodyChars?: number;
 }
